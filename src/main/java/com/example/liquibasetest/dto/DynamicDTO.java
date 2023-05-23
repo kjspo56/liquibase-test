@@ -7,5 +7,5 @@ public class DynamicDTO {
     private Long seq;
     private String dynamicColumnName;
     private String dynamicColumnValue;
-    private String tableName;
+    private String dynamicTableName;
 }

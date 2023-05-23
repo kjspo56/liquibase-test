@@ -7,7 +7,6 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <!-- Add your database changes here! -->
-
     <changeSet id="changelog-1.0" author="tedkim">
         <createTable tableName="test-table">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -17,6 +16,35 @@
                 <constraints nullable="false"/>
             </column>
             <column name="reg_date" type="TIMESTAMP(6) WITHOUT TIME ZONE" defaultValue="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Test#1 -->
+    <changeSet id="changelog-2.0" author="claudio">
+        <createTable tableName="notice">
+            <column name="seq" type="long" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <!-- Test#2 -->
+    <changeSet id="changelog-3.0" author="tedkim">
+        <createTable tableName="user">
+            <column name="seq" type="long" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
         </createTable>

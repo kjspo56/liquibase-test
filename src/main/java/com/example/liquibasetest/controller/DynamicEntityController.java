@@ -1,5 +1,6 @@
 package com.example.liquibasetest.controller;
 
+import com.example.liquibasetest.dto.DynamicDTO;
 import com.example.liquibasetest.dto.TableNameRequestDTO;
 import com.example.liquibasetest.entity.DynamicEntity;
 import com.example.liquibasetest.service.DynamicEntityService;
@@ -18,9 +19,9 @@ public class DynamicEntityController {
         this.dynamicEntityService = dynamicEntityService;
     }
 
-    @PostMapping
-    public ResponseEntity<DynamicEntity> createDynamicEntity(@RequestBody DynamicEntity dynamicEntity) {
-        DynamicEntity createdEntity = dynamicEntityService.saveDynamicEntity(dynamicEntity);
+    @PostMapping("/")
+    public ResponseEntity<DynamicEntity> createDynamicEntity(@RequestBody DynamicDTO dynamicDTO) {
+        DynamicEntity createdEntity = dynamicEntityService.saveDynamicEntity(dynamicDTO);
         return ResponseEntity.ok(createdEntity);
     }
 

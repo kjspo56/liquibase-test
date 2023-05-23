@@ -11,7 +11,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @DynamicInsert
 @DynamicUpdate
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter
 @Getter
 @Table(name = "dynamic_entity")
@@ -26,7 +25,24 @@ public class DynamicEntity {
     @Column(name = "dynamic_colmn_value")
     private String dynamicColumnValue;
 
-    @Column(name = "table_name")
-    private String tableName;
+    @Column(name = "dynamic_table_name")
+    private String dynamicTableName;
+
+    public DynamicEntity(Long seq, String dynamicColumnName, String dynamicColumnValue, String dynamicTableName){
+        this.seq = seq;
+        this.dynamicColumnName = dynamicColumnName;
+        this.dynamicColumnValue = dynamicColumnValue;
+        this.dynamicTableName = dynamicTableName;
+    }
+
+    public DynamicEntity() {
+
+    }
+
+    public void updateDynamic(String dynamicColumnName, String dynamicColumnValue, String dynamicTableName){
+        this.dynamicColumnName = dynamicColumnName;
+        this.dynamicColumnValue = dynamicColumnValue;
+        this.dynamicTableName = dynamicTableName;
+    }
 
 }
