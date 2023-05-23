@@ -1,3 +1,5 @@
+package com.example.liquibasetest.controller;
+
 import com.example.liquibasetest.dto.TeamDTO;
 import com.example.liquibasetest.service.TeamService;
 import org.springframework.http.ResponseEntity;
