@@ -20,8 +20,8 @@ public class DynamicEntityController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<DynamicEntity> createDynamicEntity(@RequestBody DynamicDTO dynamicDTO) {
-        DynamicEntity createdEntity = dynamicEntityService.saveDynamicEntity(dynamicDTO);
+    public ResponseEntity<DynamicDTO> createDynamicEntity(@RequestBody DynamicDTO dynamicDTO) {
+        DynamicDTO createdEntity = dynamicEntityService.saveDynamicEntity(dynamicDTO);
         return ResponseEntity.ok(createdEntity);
     }
 

@@ -23,15 +23,11 @@ public class DynamicEntityService {
     private final DynamicEntityRepository dynamicEntityRepository;
 
     @Transactional
-    public DynamicEntity saveDynamicEntity(DynamicDTO dynamicDTO) {
+    public DynamicDTO saveDynamicEntity(DynamicDTO dynamicDTO) {
         log.debug("create: {}" , dynamicDTO);
-        DynamicEntity dynamicEntity = new DynamicEntity();
-        dynamicEntity.setDynamicColumnName(dynamicEntity.getDynamicColumnName());
-        dynamicEntity.setDynamicColumnValue(dynamicEntity.getDynamicColumnValue());
-        dynamicEntity.setDynamicTableName(dynamicEntity.getDynamicTableName());
         //dynamicEntityRepository.save(dynamicEntity);
         dynamicEntityRepository.insertDynamicEntity(dynamicDTO.getDynamicColumnName(), dynamicDTO.getDynamicColumnValue(), dynamicDTO.getDynamicTableName());
-        return dynamicEntity;
+        return dynamicDTO;
     }
 
     public DynamicEntity getDynamicEntityById(Long seq) {
