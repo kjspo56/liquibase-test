@@ -14,4 +14,5 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
 
-
+server:
+  port: 18090
