@@ -2,10 +2,20 @@ package com.example.liquibasetest.service;
 
 import com.example.liquibasetest.dto.DynamicTableDTO;
 import com.example.liquibasetest.repository.DynamicTableRepository;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -14,38 +24,72 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.util.Collections;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Slf4j
 public class DynamicTableService {
 
+    private final DataSource dataSource;
     private final DynamicTableRepository dynamicTableRepository;
 
-    public DynamicTableService(DynamicTableRepository dynamicTableRepository) {
+    public DynamicTableService(DataSource dataSource, DynamicTableRepository dynamicTableRepository) {
+        this.dataSource = dataSource;
         this.dynamicTableRepository = dynamicTableRepository;
     }
 
     public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) {
-        System.out.println("Hello Dynamic!");
-        addChangeSetToChangeLog(dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
+        log.debug("dynamicTableDTO", dynamicTableDTO);
+
+        try {
+            // Liquibase XML 파일 경로
+            ClassPathResource changeLogFileResource = new ClassPathResource("db/changelog/db.changelog-master.xml");
+            InputStream changeLogInputStream = changeLogFileResource.getInputStream();
+            String changeLogPath = changeLogFileResource.getFile().getAbsolutePath();
+
+            Connection connection = dataSource.getConnection();
+            JdbcConnection jdbcConnection = new JdbcConnection(connection);
+
+            // Liquibase 설정
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
+            ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
+            Liquibase liquibase = new Liquibase(changeLogPath, resourceAccessor, database);
+
+            addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
+
+            // 변경 작업 수행
+            liquibase.update("");
+
+        } catch (SQLException | DatabaseException e) {
+            throw new RuntimeException(e);
+        } catch (LiquibaseException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return dynamicTableDTO;
     }
 
-    private void addChangeSetToChangeLog(String tableName, List<String> columnNames){
+    private void addChangeSetToChangeLog(String changeLogPath, String tableName, List<String> columnNames){
 
         try {
-            String changeLogPath = "src/main/resources/db/changelog/db.changelog-master.xml";  //xml 파일 생성 될 경로
-
             File changeLogFile = new File(changeLogPath);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
             Document doc = documentBuilder.parse(changeLogFile);
 
+            LocalDate now = LocalDate.now();
+
+            String changeSetIdValue = "changelog-dynamic" + now;
+
             //테이블 생성에 필요한 정보를 기반으로 XML 파일에 changeSet 추가
             Element rootElement = doc.getDocumentElement();
             Element changeSetElement = doc.createElement("changeSet");
-            changeSetElement.setAttribute("id", "changelog-dynamic");
+            changeSetElement.setAttribute("id", changeSetIdValue);
             changeSetElement.setAttribute("author", "tedkim");
 
             Element createTableElement = doc.createElement("createTable");
@@ -85,4 +129,5 @@ public class DynamicTableService {
             e.printStackTrace();
         }
     }
+
 }
