@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -82,7 +84,7 @@ public class DynamicTableService {
             DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
             Document doc = documentBuilder.parse(changeLogFile);
 
-            LocalDate now = LocalDate.now();
+            LocalDateTime now = LocalDateTime.now();
 
             String changeSetIdValue = "changelog-dynamic" + now;
 
