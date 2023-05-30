@@ -24,14 +24,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -45,14 +43,20 @@ public class DynamicTableService {
         this.dynamicTableRepository = dynamicTableRepository;
     }
 
-    public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) {
+    public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) throws IOException {
         log.debug("dynamicTableDTO", dynamicTableDTO);
 
         try {
             // Liquibase XML 파일 경로
             ClassPathResource changeLogFileResource = new ClassPathResource("db/changelog/db.changelog-master.xml");
-            InputStream changeLogInputStream = changeLogFileResource.getInputStream();
-            String changeLogPath = changeLogFileResource.getFile().getAbsolutePath();
+            //InputStream changeLogInputStream = changeLogFileResource.getInputStream();
+            String changeLogPath = "src/main/resources/" + changeLogFileResource.getPath();
+
+            File changeLogFile = new File(changeLogPath);
+
+            if(!changeLogFile.exists()){
+                System.out.println("File을 새로 만들어야 합니다.");
+            }
 
             Connection connection = dataSource.getConnection();
             JdbcConnection jdbcConnection = new JdbcConnection(connection);
@@ -64,15 +68,17 @@ public class DynamicTableService {
 
             addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
 
+            System.out.println("Change Log Path: " + changeLogPath);
+            System.out.println("Change Log File Exists: " + changeLogFile.exists());
+
             // 변경 작업 수행
             liquibase.update("");
 
         } catch (SQLException | DatabaseException e) {
             throw new RuntimeException(e);
-        } catch (LiquibaseException | IOException e) {
+        } catch (LiquibaseException e) {
             throw new RuntimeException(e);
         }
-
         return dynamicTableDTO;
     }
 
@@ -84,9 +90,7 @@ public class DynamicTableService {
             DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
             Document doc = documentBuilder.parse(changeLogFile);
 
-            LocalDateTime now = LocalDateTime.now();
-
-            String changeSetIdValue = "changelog-dynamic" + now;
+            String changeSetIdValue = "changelog-dynamic" + UUID.randomUUID();
 
             //테이블 생성에 필요한 정보를 기반으로 XML 파일에 changeSet 추가
             Element rootElement = doc.getDocumentElement();
@@ -131,5 +135,32 @@ public class DynamicTableService {
             e.printStackTrace();
         }
     }
+
+    private void createChangeLogFile(File changeLogFile) throws IOException {
+        // 새로운 XML 파일 생성 로직
+        // 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
+        // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직을 구현하세요.
+
+        // 새로운 XML 파일 생성
+        if (changeLogFile.createNewFile()) {
+            // XML 파일 생성 후 초기 내용 추가
+            FileWriter writer = new FileWriter(changeLogFile);
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
+            writer.write("<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n");
+            writer.write("                   xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\"\n");
+            writer.write("                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+            writer.write("                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog-ext\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n");
+            writer.write("\n");
+            writer.write("    <!-- Add your database changes here! -->\n");
+            writer.write("\n");
+            writer.write("</databaseChangeLog>\n");
+
+            writer.close();
+        }
+    }
+
 
 }

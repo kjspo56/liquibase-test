@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/table")
 public class DynamicTableController {
@@ -18,7 +20,7 @@ public class DynamicTableController {
     }
 
     @PostMapping("/create")
-    public DynamicTableDTO create(@RequestBody DynamicTableDTO dynamicTableDTO) {
+    public DynamicTableDTO create(@RequestBody DynamicTableDTO dynamicTableDTO) throws IOException {
         return dynamicTableService.create(dynamicTableDTO);
     }
 }
