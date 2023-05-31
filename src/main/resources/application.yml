@@ -1,3 +1,6 @@
+server:
+  port: 18090
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/roma
@@ -5,15 +8,13 @@ spring:
     password: 1111
     driver-class-name: org.postgresql.Driver
 
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    parameters:
+      searchPath: classpath:/db/changelog
+
   jpa:
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
-
-  liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.xml
-    search-path: changelogs
-
-server:
-  port: 18090

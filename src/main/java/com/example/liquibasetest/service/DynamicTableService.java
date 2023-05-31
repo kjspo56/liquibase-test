@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -37,10 +38,12 @@ public class DynamicTableService {
 
     private final DataSource dataSource;
     private final DynamicTableRepository dynamicTableRepository;
+    private final LiquibaseProperties liquibaseProperties;
 
-    public DynamicTableService(DataSource dataSource, DynamicTableRepository dynamicTableRepository) {
+    public DynamicTableService(DataSource dataSource, DynamicTableRepository dynamicTableRepository, LiquibaseProperties liquibaseProperties) {
         this.dataSource = dataSource;
         this.dynamicTableRepository = dynamicTableRepository;
+        this.liquibaseProperties = liquibaseProperties;
     }
 
     public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) throws IOException {
@@ -48,9 +51,8 @@ public class DynamicTableService {
 
         try {
             // Liquibase XML 파일 경로
-            ClassPathResource changeLogFileResource = new ClassPathResource("db/changelog/db.changelog-master.xml");
-            //InputStream changeLogInputStream = changeLogFileResource.getInputStream();
-            String changeLogPath = "src/main/resources/" + changeLogFileResource.getPath();
+            ClassPathResource changeLogFileResource = new ClassPathResource("/out/production/resources/db/changelog/db.changelog-master.xml");
+            String changeLogPath = changeLogFileResource.getPath();
 
             File changeLogFile = new File(changeLogPath);
 
@@ -64,12 +66,12 @@ public class DynamicTableService {
             // Liquibase 설정
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
             ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
-            Liquibase liquibase = new Liquibase(changeLogPath, resourceAccessor, database);
+            Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", resourceAccessor, database);
 
             addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
 
-            System.out.println("Change Log Path: " + changeLogPath);
-            System.out.println("Change Log File Exists: " + changeLogFile.exists());
+            //searhpath 출력되는지 확인 -> 잘 출력됨. 테스트 용도
+            printSearchPath();
 
             // 변경 작업 수행
             liquibase.update("");
@@ -80,6 +82,14 @@ public class DynamicTableService {
             throw new RuntimeException(e);
         }
         return dynamicTableDTO;
+    }
+
+    //test 용도. searchPath 출력 잘 되나 안되나 확인용.
+    private void printSearchPath(){
+        if (liquibaseProperties != null && liquibaseProperties.getParameters() != null) {
+            String searchPath = liquibaseProperties.getParameters().get("searchPath");
+            System.out.println("Search Path: " + searchPath);
+        }
     }
 
     private void addChangeSetToChangeLog(String changeLogPath, String tableName, List<String> columnNames){
@@ -137,6 +147,7 @@ public class DynamicTableService {
     }
 
     private void createChangeLogFile(File changeLogFile) throws IOException {
+
         // 새로운 XML 파일 생성 로직
         // 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
         // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직을 구현하세요.
