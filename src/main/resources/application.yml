@@ -12,6 +12,7 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     parameters:
       searchPath: classpath:/db/changelog
+    enabled: true
 
   jpa:
     hibernate:

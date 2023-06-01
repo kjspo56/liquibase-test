@@ -58,6 +58,8 @@ public class DynamicTableService {
 
             File changeLogFile = new File(changeLogPath);
 
+            System.out.println(changeLogFile.exists());
+
             if(!changeLogFile.exists()){
                 System.out.println("File을 새로 만들어야 합니다.");
                 //ToDO : file이 있는지 없는지 create method에서 check 할 필요가 있나..?
@@ -84,6 +86,7 @@ public class DynamicTableService {
         return dynamicTableDTO;
     }
 
+
     private void addChangeSetToChangeLog(String changeLogPath, String tableName, List<String> columnNames){
 
         try {
@@ -93,6 +96,8 @@ public class DynamicTableService {
             Document doc = documentBuilder.parse(changeLogFile);
 
             String changeSetIdValue = "changelog-dynamic" + UUID.randomUUID();
+
+            System.out.println(changeSetIdValue);
 
             //테이블 생성에 필요한 정보를 기반으로 XML 파일에 changeSet 추가
             Element rootElement = doc.getDocumentElement();
