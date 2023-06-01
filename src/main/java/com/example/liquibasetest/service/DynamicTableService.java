@@ -46,18 +46,21 @@ public class DynamicTableService {
         this.liquibaseProperties = liquibaseProperties;
     }
 
-    public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) throws IOException {
+    public DynamicTableDTO create(DynamicTableDTO dynamicTableDTO) {
         log.debug("dynamicTableDTO", dynamicTableDTO);
 
         try {
             // Liquibase XML 파일 경로
             ClassPathResource changeLogFileResource = new ClassPathResource("/out/production/resources/db/changelog/db.changelog-master.xml");
+//            ClassPathResource changeLogFileResource = new ClassPathResource("db/changelog/db.changelog-master.xml");
+            //String newFilePath = "C:\\Users\\kjspo\\IdeaProjects\\liquibase-test\\src\\main\\resources\\db\\changelog\\db.changelog-master.xml";
             String changeLogPath = changeLogFileResource.getPath();
 
             File changeLogFile = new File(changeLogPath);
 
             if(!changeLogFile.exists()){
                 System.out.println("File을 새로 만들어야 합니다.");
+                //ToDO : file이 있는지 없는지 create method에서 check 할 필요가 있나..?
             }
 
             Connection connection = dataSource.getConnection();
@@ -70,9 +73,6 @@ public class DynamicTableService {
 
             addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
 
-            //searhpath 출력되는지 확인 -> 잘 출력됨. 테스트 용도
-            printSearchPath();
-
             // 변경 작업 수행
             liquibase.update("");
 
@@ -82,14 +82,6 @@ public class DynamicTableService {
             throw new RuntimeException(e);
         }
         return dynamicTableDTO;
-    }
-
-    //test 용도. searchPath 출력 잘 되나 안되나 확인용.
-    private void printSearchPath(){
-        if (liquibaseProperties != null && liquibaseProperties.getParameters() != null) {
-            String searchPath = liquibaseProperties.getParameters().get("searchPath");
-            System.out.println("Search Path: " + searchPath);
-        }
     }
 
     private void addChangeSetToChangeLog(String changeLogPath, String tableName, List<String> columnNames){
