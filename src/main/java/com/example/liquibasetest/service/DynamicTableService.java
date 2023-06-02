@@ -59,17 +59,11 @@ public class DynamicTableService {
         try {
             // Liquibase XML 파일 경로
             ClassPathResource changeLogFileResource = new ClassPathResource("/out/production/resources/db/changelog/db.changelog-master.xml");
-//            ClassPathResource changeLogFileResource = new ClassPathResource("db/changelog/db.changelog-master.xml");
-            //String newFilePath = "C:\\Users\\kjspo\\IdeaProjects\\liquibase-test\\src\\main\\resources\\db\\changelog\\db.changelog-master.xml";
-            String changeLogPath = changeLogFileResource.getPath();
-
+            String changeLogPath = changeLogFileResource.getPath(); //out/production/resources/db/changelog/db.changelog-master.xml
             File changeLogFile = new File(changeLogPath);
 
-            System.out.println(changeLogFile.exists());
-
             if(!changeLogFile.exists()){
-                System.out.println("File을 새로 만들어야 합니다.");
-                //ToDO : file이 있는지 없는지 create method에서 check 할 필요가 있나..?
+                System.out.println("File을 새로 만들어야 합니다.");   // Todo : classpath 경로의 file exist check를 여기서 할 필요가 있나..?!
             }
 
             Connection connection = dataSource.getConnection();
@@ -80,7 +74,7 @@ public class DynamicTableService {
             ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
             Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", resourceAccessor, database);
 
-            addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());
+            addChangeSetToChangeLog(changeLogPath, dynamicTableDTO.getTableName(), dynamicTableDTO.getTableColumnNames());  // create table xml
 
             // 변경 작업 수행
             liquibase.update("");
@@ -102,13 +96,14 @@ public class DynamicTableService {
             DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
             Document doc = documentBuilder.parse(changeLogFile);
 
-            String changeSetIdValue = "changelog-dynamic" + UUID.randomUUID();
+            String changeSetIdValue = "changelog-" + UUID.randomUUID();
 
             System.out.println(changeSetIdValue);
 
             //테이블 생성에 필요한 정보를 기반으로 XML 파일에 changeSet 추가
             Element rootElement = doc.getDocumentElement();
             Element changeSetElement = doc.createElement("changeSet");
+
             changeSetElement.setAttribute("id", changeSetIdValue);
             changeSetElement.setAttribute("author", "tedkim");
 
@@ -152,7 +147,42 @@ public class DynamicTableService {
 
 
     public DynamicTableDTO update(DynamicTableDTO dynamicTableDTO){
+        log.debug("dynamicTableDTO", dynamicTableDTO);
 
+        try {
+            // Liquibase XML 파일 경로
+            ClassPathResource changeLogFileResource = new ClassPathResource("/out/production/resources/db/changelog/db.changelog-master.xml");
+            String changeLogPath = changeLogFileResource.getPath(); //out/production/resources/db/changelog/db.changelog-master.xml
+            File changeLogFile = new File(changeLogPath);
+
+            if(!changeLogFile.exists()){
+                System.out.println("File을 새로 만들어야 합니다.");   // Todo : classpath 경로의 file exist check를 여기서 할 필요가 있나..?!
+            }
+
+            Connection connection = dataSource.getConnection();
+            JdbcConnection jdbcConnection = new JdbcConnection(connection);
+
+            // Liquibase 설정
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
+            ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
+            Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", resourceAccessor, database);
+
+            //tableName 존재하는지 비교...? tableName이 똑같고, Column만 다를수도 있는데...
+            /*if(tableName 존재하는지){
+                존재하면 update 진행. column만 바뀐 걸 수도 있음.
+            } else {
+                존재하지 않으면 create
+            }*/
+            //updateTable();
+
+            // 변경 작업 수행
+            liquibase.update("");
+
+        } catch (SQLException | DatabaseException e) {
+            throw new RuntimeException(e);
+        } catch (LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
         return dynamicTableDTO;
     }
 
@@ -222,14 +252,5 @@ public class DynamicTableService {
             writer.close();
         }
     }
-
-
-
-    public DynamicTableDTO delete(DynamicTableDTO dynamicTableDTO){
-
-        return dynamicTableDTO;
-    }
-
-
 
 }
