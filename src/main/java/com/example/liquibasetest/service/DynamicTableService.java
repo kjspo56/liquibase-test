@@ -2,7 +2,14 @@ package com.example.liquibasetest.service;
 
 import com.example.liquibasetest.dto.DynamicTableDTO;
 import com.example.liquibasetest.repository.DynamicTableRepository;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.change.AddColumnConfig;
+import liquibase.change.ColumnConfig;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.DropColumnChange;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -144,10 +151,8 @@ public class DynamicTableService {
     }
 
     private void createChangeLogFile(File changeLogFile) throws IOException {
-
-        // 새로운 XML 파일 생성 로직
-        // 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
-        // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직을 구현하세요.
+        // 새로운 XML 파일 생성 로직. 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
+        // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직이 필요 할 수도 있을것 같다.
 
         // 새로운 XML 파일 생성
         if (changeLogFile.createNewFile()) {
@@ -169,6 +174,61 @@ public class DynamicTableService {
             writer.close();
         }
     }
+
+    public DynamicTableDTO update(DynamicTableDTO dynamicTableDTO){
+
+        return dynamicTableDTO;
+    }
+
+    public void updateTable(String tableName, List<String> columnsToAdd, List<String> columnsToDelete) {
+        try {
+            Connection connection = dataSource.getConnection();
+            JdbcConnection jdbcConnection = new JdbcConnection(connection);
+
+            // Liquibase 설정
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
+            Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", new ClassLoaderResourceAccessor(getClass().getClassLoader()), database);
+
+            // 변경 작업 수행을 위한 changeSet 생성
+            ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "tedkim", false, false, null, null, null, null);
+            CreateTableChange createTableChange = new CreateTableChange();
+            createTableChange.setTableName(tableName);
+
+            // 컬럼 추가
+            for (String columnToAdd : columnsToAdd) {
+                ColumnConfig columnConfig = new ColumnConfig();
+                columnConfig.setName(columnToAdd);
+                columnConfig.setType("VARCHAR(255)");
+                createTableChange.addColumn(columnConfig);
+            }
+
+            // 컬럼 삭제
+            for (String columnToDelete : columnsToDelete) {
+                DropColumnChange dropColumnChange = new DropColumnChange();
+                dropColumnChange.setTableName(tableName);
+                dropColumnChange.setColumnName(columnToDelete);
+                changeSet.addChange(dropColumnChange);
+            }
+
+            changeSet.addChange(createTableChange);
+
+            // 변경 작업 수행
+            liquibase.update(new Contexts(), new LabelExpression());
+
+            connection.close();
+        } catch (SQLException | LiquibaseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+
+    public DynamicTableDTO delete(DynamicTableDTO dynamicTableDTO){
+
+        return dynamicTableDTO;
+    }
+
 
 
 }
