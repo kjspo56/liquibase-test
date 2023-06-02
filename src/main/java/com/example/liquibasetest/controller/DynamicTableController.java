@@ -21,8 +21,8 @@ public class DynamicTableController {
         return dynamicTableService.create(dynamicTableDTO);
     }
 
-    @DeleteMapping("/delete")
-    public DynamicTableDTO delete(@RequestBody DynamicTableDTO dynamicTableDTO) {
-        return dynamicTableService.delete(dynamicTableDTO);
+    @PostMapping("/update")
+    public DynamicTableDTO update(@RequestBody DynamicTableDTO dynamicTableDTO) {
+        return dynamicTableService.update(dynamicTableDTO);
     }
 }
