@@ -150,30 +150,6 @@ public class DynamicTableService {
         }
     }
 
-    private void createChangeLogFile(File changeLogFile) throws IOException {
-        // 새로운 XML 파일 생성 로직. 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
-        // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직이 필요 할 수도 있을것 같다.
-
-        // 새로운 XML 파일 생성
-        if (changeLogFile.createNewFile()) {
-            // XML 파일 생성 후 초기 내용 추가
-            FileWriter writer = new FileWriter(changeLogFile);
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
-            writer.write("<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n");
-            writer.write("                   xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\"\n");
-            writer.write("                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-            writer.write("                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n");
-            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\n");
-            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog-ext\n");
-            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n");
-            writer.write("\n");
-            writer.write("    <!-- Add your database changes here! -->\n");
-            writer.write("\n");
-            writer.write("</databaseChangeLog>\n");
-
-            writer.close();
-        }
-    }
 
     public DynamicTableDTO update(DynamicTableDTO dynamicTableDTO){
 
@@ -221,6 +197,31 @@ public class DynamicTableService {
         }
     }
 
+
+    private void createChangeLogFile(File changeLogFile) throws IOException {
+        // 새로운 XML 파일 생성 로직. 예시로 기본적인 XML 내용을 작성하거나, 기존 XML 파일을 복사하여 사용할 수 있습니다.
+        // 필요한 경우 XML 내용을 동적으로 생성하거나 수정하는 로직이 필요 할 수도 있을것 같다.
+
+        // 새로운 XML 파일 생성
+        if (changeLogFile.createNewFile()) {
+            // XML 파일 생성 후 초기 내용 추가
+            FileWriter writer = new FileWriter(changeLogFile);
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
+            writer.write("<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n");
+            writer.write("                   xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\"\n");
+            writer.write("                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+            writer.write("                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog-ext\n");
+            writer.write("                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n");
+            writer.write("\n");
+            writer.write("    <!-- Add your database changes here! -->\n");
+            writer.write("\n");
+            writer.write("</databaseChangeLog>\n");
+
+            writer.close();
+        }
+    }
 
 
 
