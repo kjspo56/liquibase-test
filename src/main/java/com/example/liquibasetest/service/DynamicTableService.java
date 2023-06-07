@@ -167,13 +167,19 @@ public class DynamicTableService {
             ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
             Liquibase liquibase = new Liquibase("db/changelog/db.changelog-master.xml", resourceAccessor, database);
 
-            //tableName 존재하는지 비교...? tableName이 똑같고, Column만 다를수도 있는데...
+            //tableName 존재하는지 비교...? tableName이 똑같고, Column만 다를수도 있는데... 아, 그럴때가 업데이트..?!
             /*if(tableName 존재하는지){
                 존재하면 update 진행. column만 바뀐 걸 수도 있음.
             } else {
                 존재하지 않으면 create
             }*/
+
+            //tableName이 똑같을때, create와 다르게 table 생성(?) 과정을 건너뛰고 column만 수정 가능하게 할 수 있는지..?
             //updateTable();
+
+            String tableName = database.getDatabaseChangeLogTableName();
+            System.out.println(tableName);
+
 
             // 변경 작업 수행
             liquibase.update("");
